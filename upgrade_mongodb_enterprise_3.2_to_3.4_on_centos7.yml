@@ -1,0 +1,31 @@
+---
+- hosts: servers
+  gather_facts: false
+
+  tasks:
+
+  - name: Stop MongoDB Services...
+    become: true
+    shell: |
+      systemctl stop mongod
+      
+  - name: Remove MongoDB...
+    become: true
+    shell: |
+      yum erase $(rpm -qa | grep mongodb-enterprise)
+
+  - name: Update MongoDB local repo to point to 3.4...
+    become: true
+    shell: |
+      echo "[mongodb-enterprise]
+name=MongoDB Enterprise Repository
+baseurl=https://repo.mongodb.com/yum/redhat/$releasever/mongodb-enterprise/3.4/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc" > /etc/yum.repos.d/mongodb-enterprise.repo
+     yum repolist
+
+  - name: Install MongoDB 3.4...
+    become: true
+    shell: |
+      yum install -y mongodb-enterprise      
